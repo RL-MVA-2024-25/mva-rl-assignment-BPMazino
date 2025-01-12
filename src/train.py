@@ -95,22 +95,24 @@ class ProjectAgent:
     def replay(self):
         if len(self.memory) < self.batch_size:
             return
-        batch = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, next_states, dones = zip(*batch)
-        states = torch.tensor(states, dtype=torch.float32).to(self.device)
-        actions = torch.tensor(actions, dtype=torch.int64).to(self.device)
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
-        next_states = torch.tensor(next_states, dtype=torch.float32).to(self.device)
-        dones = torch.tensor(dones, dtype=torch.float32).to(self.device)
+        for _ in range(self.gradient_steps):
+            batch = random.sample(self.memory, self.batch_size)
+            states, actions, rewards, next_states, dones = zip(*batch)
+            states = torch.tensor(states, dtype=torch.float32).to(self.device)
+            actions = torch.tensor(actions, dtype=torch.int64).to(self.device)
+            rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
+            next_states = torch.tensor(next_states, dtype=torch.float32).to(self.device)
+            dones = torch.tensor(dones, dtype=torch.float32).to(self.device)
 
-        q_values = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        next_q_values = self.target_model(next_states).max(1)[0]
-        target_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+            q_values = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+            next_q_values = self.target_model(next_states).max(1)[0]
+            target_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
 
-        loss = self.loss_fn(q_values, target_q_values)
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+            loss = self.loss_fn(q_values, target_q_values)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
         
     def save(self):
         torch.save({
@@ -134,18 +136,18 @@ class ProjectAgent:
 def train(agent, env, nb_episodes):
 
     for episode in range(nb_episodes):
-        state = env.reset()
+        state, _ = env.reset()
         done = False
         total_reward = 0
         while not done:
             action = agent.act(state)
-            next_state, reward, done, _ = env.step(action)
-            agent.remember(state, action, reward, next_state, done)
+            next_state, reward, done, truncated, _ = env.step(action)
+            agent.remember(state, action, reward, next_state, done or truncated)
             state = next_state
             total_reward += reward
             agent.steps += 1
             agent.replay()
-        
+
         if episode % agent.update_target == 0:
             agent.update_target_network()
         agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
