@@ -22,14 +22,14 @@ config = {
     'buffer_size': 100000,
     'epsilon_min': 0.01,
     'epsilon_max': 1.0,
-    'epsilon_decay_period': 21000,
-    'epsilon_delay_decay': 40,
+    'epsilon_decay_period': 19000,
+    'epsilon_delay_decay': 30,
     'batch_size': 500,
     'gradient_steps': 4,
     'update_target_strategy': 'replace', 
-    'update_target_freq': 600,
+    'update_target_freq': 800,
     'criterion': torch.nn.SmoothL1Loss(),
-    'model_path': "last_chance.pkl"
+    'model_path': "model_ddqn.pkl"
 }
 
 # ------------------------------------------------------------------------------
@@ -43,15 +43,15 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.net = nn.Sequential(
             nn.Linear(state_dim, nb_neurons),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(nb_neurons, nb_neurons),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(nb_neurons, 128),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(128, nb_neurons),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(nb_neurons, nb_neurons),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(nb_neurons, n_action)
         )
 
