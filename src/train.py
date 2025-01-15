@@ -6,20 +6,8 @@ import torch.nn as nn
 import torch.optim as optim
 from copy import deepcopy
 from gymnasium.wrappers import TimeLimit
-
-# ------------------------------------------------------------------------------
-# Import custom modules
-# ------------------------------------------------------------------------------
 from env_hiv import HIVPatient
 from evaluate import evaluate_HIV, evaluate_HIV_population
-
-# ------------------------------------------------------------------------------
-# Set seeds for reproducibility
-# ------------------------------------------------------------------------------
-
-random.seed(42)
-np.random.seed(42)
-torch.manual_seed(42)
 
 # ------------------------------------------------------------------------------
 # Create environment and config
