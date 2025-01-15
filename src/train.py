@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.optim as optim
 from copy import deepcopy
 from gymnasium.wrappers import TimeLimit
-from tqdm import tqdm
 
 # ------------------------------------------------------------------------------
 # Import custom modules
